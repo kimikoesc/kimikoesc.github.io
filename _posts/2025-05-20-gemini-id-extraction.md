@@ -86,15 +86,19 @@ We use these values to determine the next step:
 ## Challenges and Observations
 
 - **Garbage In, Garbage Out**
+
 Gemini performs well, but only if the image is clear. Low-quality images lead to bad results. `is_valid_id` and `confidence_level` help catch this early.
 
 - **Wide Format Variation**
+
 IDs vary across countries and card types. The structured schema helps generalize across formats without needing to re-prompt or post-process too heavily.
 
 - **Latency and Cost Balance**
+
 Gemini’s processing time is acceptable for our flow, and using structured outputs helped reduce token count, making the cost manageable.
 
 - **Fallback Flow**
+
 We built a simple retry-and-review logic around these outputs. If the image fails validation, users can try again or request manual help.
 
 ---
