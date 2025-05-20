@@ -6,8 +6,6 @@ tags: ["ai", "gemini", "ocr", "golang"]
 draft: false
 ---
 
-# Extracting Government ID Information with Gemini and Structured Output
-
 Our app requires users to submit personal details such as their name and government-issued ID number (e.g., an IC card or passport). Initially, we relied on manual input: a simple text form that users filled out themselves.
 
 Unsurprisingly, this approach led to significant issues. Users frequently entered typos or provided incomplete information. In some cases, they abandoned the app entirely due to the friction. To improve the onboarding experience and ensure data accuracy, we introduced a new feature: photo-based ID submission.
