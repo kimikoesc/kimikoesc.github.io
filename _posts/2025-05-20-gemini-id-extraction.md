@@ -6,23 +6,31 @@ tags: ["ai", "gemini", "ocr", "golang"]
 draft: false
 ---
 
-Our app requires users to submit personal details such as their name and government-issued ID number (e.g., an IC card or passport). Initially, we relied on manual input: a simple text form that users filled out themselves.
-
-Unsurprisingly, this approach led to significant issues. Users frequently entered typos or provided incomplete information. In some cases, they abandoned the app entirely due to the friction. To improve the onboarding experience and ensure data accuracy, we introduced a new feature: photo-based ID submission.
+How do you KYC?  Many fintechs need a Know Your Customer step for due diligence, there are many 3rd party services available to perform this but in the age of AI, I was interested to see if they’re still needed.
 
 ---
 
-## Why We Use Gemini Instead of 3rd Party OCR Services
+## Why I Use AI Instead of 3rd Party OCR Services
 
 There are plenty of commercial ID-scanning APIs on the market that offer robust OCR pipelines with validation layers and fraud detection. However, most of them are paid services, and costs can ramp up quickly, especially at scale.
 
-We decided to build our own ID extraction pipeline using [Gemini](https://ai.google.dev/gemini-api/docs) instead. It offered us more control, flexibility, and most importantly, cost-efficiency. Our infrastructure is optimized for latency and cost, and we found Gemini's image understanding capabilities were strong enough to justify building a lightweight in-house solution.
+I decided to build my own ID extraction pipeline using AI instead. It offered more control, flexibility, and most importantly, cost-efficiency.
+
+---
+
+## Why Gemini
+
+Gemini is a great fit for ID extraction thanks to its combination of vision and language capabilities, structured output, and low overhead.
+
+- **Image + Language Understanding** – Gemini can [analyze ID images](https://ai.google.dev/gemini-api/docs/image-understanding) and extract structured information in one step, without needing a separate OCR layer.
+- **Native JSON Output** – With structured output, we skip brittle text parsing and get clean, ready-to-use data directly from the model.
+- **Simple and Scalable** – No vendor lock-in or per-scan fees — just a flexible, prompt-based approach that scales with usage.
 
 ---
 
 ## ID Extraction Using Gemini + Structured Output
 
-We send the uploaded image of the ID to Gemini, along with a short instruction prompt. Rather than parsing the response ourselves from raw text, we use **structured output** with a predefined JSON schema. Here's why this matters:
+We send the uploaded image of the ID to Gemini, along with a short instruction prompt. Rather than parsing the response from raw text, we use **structured output** with a predefined JSON schema. Here's why this matters:
 
 - **Reduced token usage** – Using `ResponseSchema` saves tokens compared to crafting long, example-heavy prompts.
 - **Cleaner integration** – We get ready-to-parse data without relying on brittle string parsing.
@@ -36,20 +44,20 @@ config := &genai.GenerateContentConfig{
 	ResponseSchema: &genai.Schema{
 		Type: genai.TypeObject,
 		Properties: map[string]*genai.Schema{
-			"government_issued_id": {...},
-			"government_issued_name": {...},
+			"gov_id_number": {...},
+			"gov_id_name": {...},
 			"is_valid_id": {...},
 			"country": {...},
-			"id_type": {...},
+			"gov_id_type": {...},
 			"confidence_level": {...},
 			"card_condition": {...},
 		},
 		Required: []string{
-			"government_issued_id",
-			"government_issued_name",
+			"gov_id_number",
+			"gov_id_name",
 			"is_valid_id",
 			"country",
-			"id_type",
+			"gov_id_type",
 			"confidence_level",
 			"card_condition",
 		},
@@ -62,7 +70,7 @@ The actual prompt sent is minimal:
 ```go
 Text: "Analyze the provided image of an ID card. Extract the government issued number and the full name."
 ```
-The image is passed via `InlineData`, and Gemini returns a clean JSON response matching our schema.
+The image is passed via `InlineData`, and Gemini returns a clean JSON response matching the schema.
 
 ---
 
@@ -95,7 +103,7 @@ IDs vary across countries and card types. The structured schema helps generalize
 
 - **Latency and Cost Balance**
 
-Gemini’s processing time is acceptable for our flow, and using structured outputs helped reduce token count, making the cost manageable.
+Gemini’s processing time is acceptable for the flow, and using structured outputs helped reduce token count, making the cost manageable.
 
 - **Fallback Flow**
 
